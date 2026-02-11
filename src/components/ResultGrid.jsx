@@ -1,8 +1,53 @@
-import React from 'react'
+
+import { useDispatch, useSelector } from 'react-redux'
+import {fetchPhotos , fetchVideo}  from '../api/mediaApi'
+import {setLoading, setError,setResults  } from '../redux/features/serachSlice'
+import { useEffect } from 'react'
 
 const ResultGrid = () => {
+  const dispatch = useDispatch()
+  const {query,activeTab, results , loading,error} = useSelector((state)=>state.search)
+  useEffect(function(){
+    if(!query) return
+    const getData = async()=>{
+      try{
+        let data = []
+        if(activeTab =='photo'){
+          let response = await fetchPhotos(query)
+          data=response.results.map((item)=>({
+            id:item.id,
+            type:'photo',
+            title:item.description,
+            thumbnail:item.urls.small,
+            src:item.urls.full,
+            url:item.links.html
+          }))
+        }
+        if(activeTab =='video'){
+          let response = await fetchPhotos(query)
+          data=response.results.map((item)=>({
+            id:item.id,
+            type:'video',
+            title:item.user.name|| 'video',
+            thumbnail:item.image,
+            src:item.video_files[0].link,
+            url:item.url
+          }))
+        }
+
+      }catch(err){
+      dispatch(setError(err))
+    }
+    }
+    getData()
+  },[query,activeTab , dispatch])
   return (
-    <div>
+    <div className='flex justify-between w-full flex-wrap gap-6 overflow-auto px-10'>
+      {results.map((item,idx)=>{
+        return <div key={idx}>
+          
+        </div>
+      })}
       
     </div>
   )
